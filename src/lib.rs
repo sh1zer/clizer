@@ -5,19 +5,19 @@ use lines::{CustomLine, Line};
 
 pub struct DrawingArea{
     start_line: u32,
-    height: u32,
+    height: usize,
     start_column: u32,
-    width: u32,
+    width: usize,
     cursor: Cursor,
     content: Vec<String>,
     border: Vec<Box<dyn Line>>,
 }
 
 impl DrawingArea{
-    pub fn new(start_column: u32, start_line: u32, height: u32, width: u32) -> Self{
+    pub fn new(start_column: u32, start_line: u32, height: usize, width: usize) -> Self{
         let mut content: Vec<String> = Vec::new(); 
         for _ in 0..height{
-            let line: String = " ".repeat(width as usize);
+            let line: String = "".to_string();
             content.push(line);
         }
         DrawingArea{
@@ -33,7 +33,7 @@ impl DrawingArea{
 
     pub fn clear(mut self){
         for line in &mut self.content{
-            *line = " ".repeat(self.width as usize);
+            *line = " ".repeat(self.width);
         }
         for layer in &mut self.border{
             *layer = Box::new(CustomLine(' '));
@@ -43,7 +43,7 @@ impl DrawingArea{
 
     pub fn clear_content(&mut self){
         for line in &mut self.content{
-            *line = " ".repeat(self.width as usize);
+            *line = " ".repeat(self.width);
         }
     }
 
@@ -59,8 +59,10 @@ impl DrawingArea{
         let gap: String = " ".repeat(self.start_column as usize);
         let left_border = self.vert_border();
         let right_border = left_border.chars().rev().collect::<String>();
+
         for line in &self.content{
-            println!("{gap}{left_border}{line}{right_border}");
+            let buf = " ".repeat(self.width - line.len());
+            println!("{gap}{left_border}{line}{buf}{right_border}");
         }
         
         if !self.border.is_empty() {self.draw_bottom_border();}
@@ -73,7 +75,7 @@ impl DrawingArea{
         let mut used = "".to_string();
         let gap: String = " ".repeat(self.start_column as usize);
         for layer in &self.border{
-            let mut top: String = iter::repeat(layer.hori()).take(self.width as usize + layers * 2 - 2).collect();
+            let mut top: String = iter::repeat(layer.hori()).take(self.width + layers * 2 - 2).collect();
             top.insert(0, layer.top_left());
             top.push(layer.top_right());
             layers -= 1;
@@ -87,7 +89,7 @@ impl DrawingArea{
         let mut used = self.vert_border();
         let gap: String = " ".repeat(self.start_column as usize);
         for layer in self.border.iter().rev(){
-            let mut top: String = iter::repeat(layer.hori()).take(self.width as usize + (self.border.len() - layers + 1) * 2 - 2).collect();
+            let mut top: String = iter::repeat(layer.hori()).take(self.width + (self.border.len() - layers + 1) * 2 - 2).collect();
             top.insert(0, layer.bot_left());
             top.push(layer.bot_right());
             layers -= 1;
@@ -102,6 +104,29 @@ impl DrawingArea{
             res.push(layer.vert());
         }
         res
+    }
+
+    pub fn write(&mut self, text: String, row: usize){
+        if row >= self.height {return;}
+        if text.len() > self.width{
+            let fin_text = text.as_str()[0..self.width].to_string();
+            self.content[row] = fin_text; 
+        }
+        else{
+            self.content[row] = text;
+        }
+    }
+
+    pub fn write_middle(&mut self, text: String, row: usize){
+        if row >= self.height {return;}
+        if text.len() > self.width{
+            let fin_text = text.as_str()[0..self.width].to_string();
+            self.content[row] = fin_text; 
+        }
+        else{
+            let buf = " ".repeat((self.width - text.len()) / 2);
+            self.content[row] = format!("{buf}{text}{buf}");
+        }
     }
 
 }
