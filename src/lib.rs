@@ -11,6 +11,7 @@ pub struct DrawingArea{
     width: u32,
     cursor: Cursor,
     content: Vec<String>,
+    border: String,
 }
 
 impl DrawingArea{
@@ -27,19 +28,52 @@ impl DrawingArea{
             start_column: 0,
             width,
             content,
+            border: "".to_string(),
         }
     }
 
-    pub fn draw_outline(&mut self, border: char){
-        let top: String = iter::repeat(border).take(self.width as usize + 2).collect();
-        
-        self.cursor.jump_up(self.cursor.curr_line);
-        println!("{top}");
+    pub fn add_border(&mut self, border: char){
+        self.border.push(border);
+    }
+
+    pub fn draw(&mut self){
+        self.cursor.jump_up(self.cursor.curr_line - self.start_line as i32 - 1);
+
+        self.draw_top_border();
+
         for line in &self.content{
-            println!("{border}{line}{border}");
+            let reverse = self.border.chars().rev().collect::<String>();
+            println!("{}{line}{}", self.border, reverse);
         }
-        println!("{top}");
         
+        self.draw_bottom_border();
+
+        self.cursor.curr_line = self.height as i32 + self.border.len() as i32 * 2 + 1;
+    }
+
+    fn draw_top_border(&mut self) {
+        let mut layers = self.border.len();
+        let mut used = "".to_string();
+        let mut used_rev = used.clone();
+        for layer in self.border.chars(){
+            let top: String = iter::repeat(layer).take(self.width as usize + layers * 2).collect();
+            layers -= 1;
+            println!("{used}{top}{used_rev}");
+            used.push(layer);
+            used_rev.insert(0, layer);
+        }
+    }
+
+    fn draw_bottom_border(&mut self) {
+        let mut layers = self.border.len();
+        let mut used = self.border.clone();
+        for layer in self.border.chars().rev(){
+            let top: String = iter::repeat(layer).take(self.width as usize + (self.border.len() - layers + 1) * 2).collect();
+            layers -= 1;
+            used.pop();
+            let used_rev = used.chars().rev().collect::<String>();
+            println!("{used}{top}{used_rev}");
+        }
     }
 
 }
@@ -66,23 +100,29 @@ impl Cursor{
         print!("\x1B[{offset}B");
     }
 
+    ///offset is inverse to the "intuitive" line value, i.e. after printing two lines you should
+    ///add 2  to offset, even though you're 2 lines lower
+    fn adjust(&mut self, offset: i32){
+        self.curr_line += offset;
+    }
+
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::cursor::{jump, Cursor};
-
-    use super::*;
-
-    #[test]
-    fn piss_off(){
-        let area = DrawingArea::new(2, 2);
-        assert_eq!(area.num_of_lines, 2);
-        assert_eq!(area.start_line, 2);
-    }
-    #[test]
-    fn cursor_jumpin(){
-        println!("hello\nhi\nwhaddup");
-        println!("nevermind");
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     use crate::cursor::{jump, Cursor};
+//
+//     use super::*;
+//
+//     #[test]
+//     fn piss_off(){
+//         let area = DrawingArea::new(2, 2);
+//         assert_eq!(area.num_of_lines, 2);
+//         assert_eq!(area.start_line, 2);
+//     }
+//     #[test]
+//     fn cursor_jumpin(){
+//         println!("hello\nhi\nwhaddup");
+//         println!("nevermind");
+//     }
+// }

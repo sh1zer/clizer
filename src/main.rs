@@ -5,11 +5,16 @@ mod cursor;
 
 fn main(){
 
-    println!("hi\nhello\nwhadup");
-    print!("\x1B[3A");
-    sleep(Duration::from_secs(1));
-    println!("nevermind...");
+    let mut area = DrawingArea::new(0, 5, 20);
+    area.add_border('#');
+    area.draw();
+    sleep(Duration::from_secs(4));
+    area.add_border('0');
+    area.draw();
+    sleep(Duration::from_secs(4));
+    // println!("hi\nhello\nwhadup");
+    // print!("\x1B[2A");
+    // sleep(Duration::from_secs(1));
+    // println!("nevermind...");
 
-    let mut area = DrawingArea::new(4, 5, 20);
-    area.draw_outline('#');
 }
