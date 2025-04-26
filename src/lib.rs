@@ -77,7 +77,6 @@ impl DrawingArea{
             used_rev.insert(0, layer);
         }
     }
-
     fn draw_bottom_border(&mut self) {
         let mut layers = self.border.len();
         let mut used = self.border.clone();
