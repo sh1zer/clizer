@@ -1,6 +1,6 @@
 pub struct Cursor{
-    curr_line:i32,
-    curr_col:i32,
+    pub curr_line:i32,
+    pub curr_col:i32,
 }
 
 impl Cursor{
