@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 pub mod lines;
 pub mod cursor;
+
+use std::io::{self, Write};
 use std::iter;
 use lines::{CustomLine, Line};
 use cursor::Cursor;
@@ -25,7 +27,7 @@ impl Canvas {
         Canvas{
             start_line,
             height,
-            cursor: Cursor::new(start_line, start_column),
+            cursor: Cursor::new(1, 1),
             start_column,
             width,
             content,
@@ -54,24 +56,28 @@ impl Canvas {
     }
 
     pub fn draw(&mut self){
-        self.cursor.jump_up(self.cursor.curr_line - self.start_line - 1);
+        //self.cursor.jump_up(self.cursor.curr_line - self.start_line - 1);
+        self.cursor.move_to_line(self.start_line);
+        self.cursor.move_to_col(0);
 
         self.draw_top_border();
 
-        // let gap: String = " ".repeat(self.start_column as usize);
-        let gap = "".to_string();
         let left_border = self.vert_border();
         let right_border = left_border.chars().rev().collect::<String>();
 
         for line in &self.content{
             let buf = " ".repeat(self.width - line.len());
             self.cursor.jump_right(self.start_column);
-            println!("{gap}{left_border}{line}{buf}{right_border}");
+            print!("{left_border}{line}{buf}{right_border}");
+            self.cursor.jump_down(1);
+            self.cursor.start_of_line();
         }
 
         self.draw_bottom_border();
 
-        self.cursor.move_to_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
+        // self.cursor.move_to_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
+        self.reset_cursor();
+        let _ = io::stdout().flush();
     }
 
     fn draw_top_border(&mut self) {
@@ -88,10 +94,14 @@ impl Canvas {
 
             layers -= 1;
             let used_rev = used.chars().rev().collect::<String>();
-            self.cursor.jump_right(self.start_column);
-            println!("{used}{top}{used_rev}");
+            self.cursor.jump_right(self.start_column - self.border.len() as i32);
+            print!("{used}{top}{used_rev}");
+            self.cursor.jump_down(1);
+            self.cursor.start_of_line();
+
             used.push(layer.vert());
         }
+        //self.cursor.jump_up(1);
     }
     fn draw_bottom_border(&mut self) {
         if self.border.is_empty() {return;}
@@ -110,7 +120,9 @@ impl Canvas {
             let used_rev = used.chars().rev().collect::<String>();
 
             self.cursor.jump_right(self.start_column);
-            println!("{used}{top}{used_rev}");
+            print!("{used}{top}{used_rev}");
+            self.cursor.jump_down(1);
+            self.cursor.start_of_line();
         }
     }
     fn vert_border(&self) -> String{
@@ -154,6 +166,17 @@ impl Canvas {
             let buf = " ".repeat(self.width - text.len());
             self.content[row] = format!("{buf}{text}");
         }
+    }
+
+    pub fn get_cursor(&self) -> &Cursor{
+        &self.cursor
+    }
+
+    pub fn reset_cursor(&mut self) {
+        self.cursor.move_to_line(1);
+        print!("\r");
+        self.cursor.curr_line = 1;
+        self.cursor.curr_col = 1;
     }
 
 }
