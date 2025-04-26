@@ -15,17 +15,17 @@ fn main(){
     area.write("THIS STRING IS WAYYYYY TOOO LONG MAN WTF HOW CAN I FIT THIS IN THE BOX".to_string(), 4);
     area.draw();
     
-    sleep(Duration::from_secs(4));
 
-    let mut curs = cursor::Cursor::new(0, 0);
-    curs.jump_down(7);
-    print!("\x1B[6A");
+    cursor::cursor_jump_up(9);
 
-    sleep(Duration::from_secs(4));
     let mut area2 = Canvas::new(49, 0, 5, 20);
     area2.add_border(DoubleLine);
     area2.write_middle("box two".to_string(), 0);
     area2.draw();
+
+    area.draw();
+
+    cursor::cursor_jump_down(1000);
     // sleep(Duration::from_secs(4));
     // area.clear();
     // area.add_border('0');

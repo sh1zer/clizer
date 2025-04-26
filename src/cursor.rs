@@ -46,3 +46,27 @@ impl Cursor{
         self.curr_line = new_line;
     }
 }
+pub fn cursor_jump_up(offset:i32){
+    if offset < 0 {return;}
+    print!("\x1B[{offset}A");
+}
+
+pub fn cursor_jump_down(offset:i32){
+    if offset < 0 {return;}
+    print!("\x1B[{offset}B");
+}
+
+pub fn cursor_jump_left(offset: i32){
+    if offset < 0 {return;}
+    print!("\x1B[{offset}D");
+}
+
+pub fn cursor_jump_right(offset: i32){
+    if offset < 0 {return;}
+    print!("\x1B[{offset}C");
+}
+
+pub fn cursor_move_to_col(col: i32){
+    if col < 1 {return;}
+    print!("\r\x1B[{col}C");
+}
