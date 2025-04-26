@@ -32,6 +32,20 @@ impl DrawingArea{
         }
     }
 
+    pub fn clear(mut self){
+        for line in &mut self.content{
+            *line = " ".repeat(self.width as usize);
+        }
+        self.border = " ".repeat(self.border.len());
+        self.draw();
+    }
+
+    pub fn clear_content(&mut self){
+        for line in &mut self.content{
+            *line = " ".repeat(self.width as usize);
+        }
+    }
+
     pub fn add_border(&mut self, border: char){
         self.border.push(border);
     }
