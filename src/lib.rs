@@ -15,7 +15,7 @@ pub struct DrawingArea{
 }
 
 impl DrawingArea{
-    pub fn new(start_line: u32, height: u32, width: u32) -> Self{
+    pub fn new(start_column: u32, start_line: u32, height: u32, width: u32) -> Self{
         let mut content: Vec<String> = Vec::new(); 
         for _ in 0..height{
             let line: String = " ".repeat(width as usize);
@@ -25,7 +25,7 @@ impl DrawingArea{
             start_line,
             height,
             cursor: Cursor::new(0),
-            start_column: 0,
+            start_column,
             width,
             content,
             border: "".to_string(),
@@ -40,25 +40,27 @@ impl DrawingArea{
         self.cursor.jump_up(self.cursor.curr_line - self.start_line as i32 - 1);
 
         self.draw_top_border();
-
+        
+        let gap: String = " ".repeat(self.start_column as usize);
+        let reverse = self.border.chars().rev().collect::<String>();
         for line in &self.content{
-            let reverse = self.border.chars().rev().collect::<String>();
-            println!("{}{line}{}", self.border, reverse);
+            println!("{gap}{}{line}{}", self.border, reverse);
         }
         
         self.draw_bottom_border();
 
-        self.cursor.curr_line = self.height as i32 + self.border.len() as i32 * 2 + 1;
+        self.cursor.set_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
     }
 
     fn draw_top_border(&mut self) {
         let mut layers = self.border.len();
         let mut used = "".to_string();
         let mut used_rev = used.clone();
+        let gap: String = " ".repeat(self.start_column as usize);
         for layer in self.border.chars(){
             let top: String = iter::repeat(layer).take(self.width as usize + layers * 2).collect();
             layers -= 1;
-            println!("{used}{top}{used_rev}");
+            println!("{gap}{used}{top}{used_rev}");
             used.push(layer);
             used_rev.insert(0, layer);
         }
@@ -67,12 +69,13 @@ impl DrawingArea{
     fn draw_bottom_border(&mut self) {
         let mut layers = self.border.len();
         let mut used = self.border.clone();
+        let gap: String = " ".repeat(self.start_column as usize);
         for layer in self.border.chars().rev(){
             let top: String = iter::repeat(layer).take(self.width as usize + (self.border.len() - layers + 1) * 2).collect();
             layers -= 1;
             used.pop();
             let used_rev = used.chars().rev().collect::<String>();
-            println!("{used}{top}{used_rev}");
+            println!("{gap}{used}{top}{used_rev}");
         }
     }
 
@@ -106,6 +109,9 @@ impl Cursor{
         self.curr_line += offset;
     }
 
+    fn set_line(&mut self, new_line: i32){
+        self.curr_line = new_line;
+    }
 }
 
 // #[cfg(test)]
