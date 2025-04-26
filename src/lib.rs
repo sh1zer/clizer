@@ -1,9 +1,11 @@
 #![allow(dead_code)]
 pub mod lines;
+pub mod cursor;
 use std::iter;
 use lines::{CustomLine, Line};
+use cursor::Cursor;
 
-pub struct DrawingArea{
+pub struct Canvas{
     start_line: u32,
     height: usize,
     start_column: u32,
@@ -13,17 +15,17 @@ pub struct DrawingArea{
     border: Vec<Box<dyn Line>>,
 }
 
-impl DrawingArea{
+impl Canvas {
     pub fn new(start_column: u32, start_line: u32, height: usize, width: usize) -> Self{
         let mut content: Vec<String> = Vec::new(); 
         for _ in 0..height{
             let line: String = "".to_string();
             content.push(line);
         }
-        DrawingArea{
+        Canvas{
             start_line,
             height,
-            cursor: Cursor::new(0),
+            cursor: Cursor::new(start_line as i32, start_column as i32),
             start_column,
             width,
             content,
@@ -67,7 +69,7 @@ impl DrawingArea{
 
         self.draw_bottom_border();
 
-        self.cursor.set_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
+        self.cursor.move_to_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
     }
 
     fn draw_top_border(&mut self) {
@@ -138,40 +140,21 @@ impl DrawingArea{
         }
     }
 
-}
-
-struct Cursor{
-    curr_line:i32,
-}
-
-impl Cursor{
-    fn new(curr_line: i32) -> Self{
-        Cursor{curr_line}
-    }
-
-    fn jump_up(&mut self, offset:i32){
-        if self.curr_line - offset < 0{
-            return;
+    pub fn write_right(&mut self, text: String, row: usize){
+        if row >= self.height {return;}
+        if text.len() > self.width{
+            let fin_text = text.as_str()[0..self.width].to_string();
+            self.content[row] = fin_text; 
         }
-        self.curr_line -= offset;
-        print!("\x1B[{offset}A");
+        else{
+            let buf = " ".repeat(self.width - text.len());
+            self.content[row] = format!("{buf}{text}");
+        }
     }
 
-    fn jump_down(&mut self, offset:i32){
-        self.curr_line += offset;
-        print!("\x1B[{offset}B");
-    }
-
-    ///offset is inverse to the "intuitive" line value, i.e. after printing two lines you should
-    ///add 2  to offset, even though you're 2 lines lower
-    fn adjust(&mut self, offset: i32){
-        self.curr_line += offset;
-    }
-
-    fn set_line(&mut self, new_line: i32){
-        self.curr_line = new_line;
-    }
 }
+
+
 
 // #[cfg(test)]
 // mod tests {
