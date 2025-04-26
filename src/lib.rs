@@ -54,8 +54,8 @@ impl DrawingArea{
     pub fn draw(&mut self){
         self.cursor.jump_up(self.cursor.curr_line - self.start_line as i32 - 1);
 
-        if !self.border.is_empty() {self.draw_top_border();}
-        
+        self.draw_top_border();
+
         let gap: String = " ".repeat(self.start_column as usize);
         let left_border = self.vert_border();
         let right_border = left_border.chars().rev().collect::<String>();
@@ -64,20 +64,24 @@ impl DrawingArea{
             let buf = " ".repeat(self.width - line.len());
             println!("{gap}{left_border}{line}{buf}{right_border}");
         }
-        
-        if !self.border.is_empty() {self.draw_bottom_border();}
+
+        self.draw_bottom_border();
 
         self.cursor.set_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
     }
 
     fn draw_top_border(&mut self) {
+        if self.border.is_empty() {return;}
+
         let mut layers = self.border.len();
         let mut used = "".to_string();
         let gap: String = " ".repeat(self.start_column as usize);
+
         for layer in &self.border{
             let mut top: String = iter::repeat(layer.hori()).take(self.width + layers * 2 - 2).collect();
             top.insert(0, layer.top_left());
             top.push(layer.top_right());
+
             layers -= 1;
             let used_rev = used.chars().rev().collect::<String>();
             println!("{gap}{used}{top}{used_rev}");
@@ -85,16 +89,21 @@ impl DrawingArea{
         }
     }
     fn draw_bottom_border(&mut self) {
+        if self.border.is_empty() {return;}
+
         let mut layers = self.border.len();
         let mut used = self.vert_border();
         let gap: String = " ".repeat(self.start_column as usize);
+        
         for layer in self.border.iter().rev(){
             let mut top: String = iter::repeat(layer.hori()).take(self.width + (self.border.len() - layers + 1) * 2 - 2).collect();
             top.insert(0, layer.bot_left());
             top.push(layer.bot_right());
+            
             layers -= 1;
             used.pop();
             let used_rev = used.chars().rev().collect::<String>();
+
             println!("{gap}{used}{top}{used_rev}");
         }
     }
