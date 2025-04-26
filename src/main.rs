@@ -2,14 +2,16 @@ use std::{thread::sleep, time::Duration};
 
 use clizer::DrawingArea;
 mod cursor;
+mod lines;
+use clizer::lines::FatLine;
 
 fn main(){
-
     let mut area = DrawingArea::new(9, 0, 5, 30);
-    area.add_border('█');
+    area.add_border('#');
+    area.add_border(FatLine);
     area.draw();
-    sleep(Duration::from_secs(4));
-    area.clear();
+    // sleep(Duration::from_secs(4));
+    // area.clear();
     // area.add_border('0');
     // area.draw();
     // sleep(Duration::from_secs(4));

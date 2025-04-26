@@ -14,7 +14,7 @@ pub struct FatLine;
 #[derive(Debug, Clone, Copy)]
 pub struct DoubleLine;
 #[derive(Debug, Clone, Copy)]
-pub struct CustomLine(char);
+pub struct CustomLine(pub char);
 
 impl Line for ThinLine{
     fn vert(&self) -> char { '│' }
@@ -48,4 +48,13 @@ impl Line for CustomLine{
     fn bot_left(&self) -> char { self.0 }
     fn bot_right(&self) -> char { self.0 }
 }
+impl Line for char{
+    fn vert(&self) -> char { *self }
+    fn hori(&self) -> char { *self }
+    fn top_left(&self) -> char { *self }
+    fn top_right(&self) -> char { *self }
+    fn bot_left(&self) -> char { *self }
+    fn bot_right(&self) -> char { *self }
+}
+
 

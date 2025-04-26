@@ -1,7 +1,7 @@
 #![allow(dead_code)]
-mod lines;
+pub mod lines;
 use std::iter;
-use lines::Line;
+use lines::{CustomLine, Line};
 
 pub struct DrawingArea{
     start_line: u32,
@@ -10,7 +10,7 @@ pub struct DrawingArea{
     width: u32,
     cursor: Cursor,
     content: Vec<String>,
-    border: Vec<Box<dyn >,
+    border: Vec<Box<dyn Line>>,
 }
 
 impl DrawingArea{
@@ -27,7 +27,7 @@ impl DrawingArea{
             start_column,
             width,
             content,
-            border: "".to_string(),
+            border: Vec::new(),
         }
     }
 
@@ -35,7 +35,9 @@ impl DrawingArea{
         for line in &mut self.content{
             *line = " ".repeat(self.width as usize);
         }
-        self.border = " ".repeat(self.border.len());
+        for layer in &mut self.border{
+            *layer = Box::new(CustomLine(' '));
+        }
         self.draw();
     }
 
@@ -45,22 +47,23 @@ impl DrawingArea{
         }
     }
 
-    pub fn add_border<L: lines::Line>(&mut self, border: L){
-        self.border.push(border);
+    pub fn add_border<L: Line + 'static>(&mut self, border: L){
+        self.border.push(Box::new(border));
     }
 
     pub fn draw(&mut self){
         self.cursor.jump_up(self.cursor.curr_line - self.start_line as i32 - 1);
 
-        self.draw_top_border();
+        if !self.border.is_empty() {self.draw_top_border();}
         
         let gap: String = " ".repeat(self.start_column as usize);
-        let reverse = self.border.chars().rev().collect::<String>();
+        let left_border = self.vert_border();
+        let right_border = left_border.chars().rev().collect::<String>();
         for line in &self.content{
-            println!("{gap}{}{line}{}", self.border, reverse);
+            println!("{gap}{left_border}{line}{right_border}");
         }
         
-        self.draw_bottom_border();
+        if !self.border.is_empty() {self.draw_bottom_border();}
 
         self.cursor.set_line(self.height as i32 + self.border.len() as i32 * 2 + 1);
     }
@@ -68,27 +71,37 @@ impl DrawingArea{
     fn draw_top_border(&mut self) {
         let mut layers = self.border.len();
         let mut used = "".to_string();
-        let mut used_rev = used.clone();
         let gap: String = " ".repeat(self.start_column as usize);
-        for layer in self.border.chars(){
-            let top: String = iter::repeat(layer).take(self.width as usize + layers * 2).collect();
+        for layer in &self.border{
+            let mut top: String = iter::repeat(layer.hori()).take(self.width as usize + layers * 2 - 2).collect();
+            top.insert(0, layer.top_left());
+            top.push(layer.top_right());
             layers -= 1;
+            let used_rev = used.chars().rev().collect::<String>();
             println!("{gap}{used}{top}{used_rev}");
-            used.push(layer);
-            used_rev.insert(0, layer);
+            used.push(layer.vert());
         }
     }
     fn draw_bottom_border(&mut self) {
         let mut layers = self.border.len();
-        let mut used = self.border.clone();
+        let mut used = self.vert_border();
         let gap: String = " ".repeat(self.start_column as usize);
-        for layer in self.border.chars().rev(){
-            let top: String = iter::repeat(layer).take(self.width as usize + (self.border.len() - layers + 1) * 2).collect();
+        for layer in self.border.iter().rev(){
+            let mut top: String = iter::repeat(layer.hori()).take(self.width as usize + (self.border.len() - layers + 1) * 2 - 2).collect();
+            top.insert(0, layer.bot_left());
+            top.push(layer.bot_right());
             layers -= 1;
             used.pop();
             let used_rev = used.chars().rev().collect::<String>();
             println!("{gap}{used}{top}{used_rev}");
         }
+    }
+    fn vert_border(&self) -> String{
+        let mut res = "".to_string();
+        for layer in &self.border{
+            res.push(layer.vert());
+        }
+        res
     }
 
 }
