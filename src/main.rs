@@ -1,8 +1,8 @@
-// use std::{thread::sleep, time::Duration};
+use std::{thread::sleep, time::Duration};
 
 use clizer::Canvas;
 use clizer::lines::{DoubleLine, FatLine, ThinLine};
-
+use clizer::cursor;
 fn main(){
     let mut area = Canvas::new(9, 0, 5, 30);
     area.add_border(DoubleLine);
@@ -14,8 +14,14 @@ fn main(){
     area.write_middle("Text in the middle".to_string(), 0);
     area.write("THIS STRING IS WAYYYYY TOOO LONG MAN WTF HOW CAN I FIT THIS IN THE BOX".to_string(), 4);
     area.draw();
+    
+    sleep(Duration::from_secs(4));
 
+    let mut curs = cursor::Cursor::new(0, 0);
+    curs.jump_down(7);
+    print!("\x1B[6A");
 
+    sleep(Duration::from_secs(4));
     let mut area2 = Canvas::new(49, 0, 5, 20);
     area2.add_border(DoubleLine);
     area2.write_middle("box two".to_string(), 0);

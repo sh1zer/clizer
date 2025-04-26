@@ -6,9 +6,9 @@ use lines::{CustomLine, Line};
 use cursor::Cursor;
 
 pub struct Canvas{
-    start_line: u32,
+    start_line: i32,
     height: usize,
-    start_column: u32,
+    start_column: i32,
     width: usize,
     cursor: Cursor,
     content: Vec<String>,
@@ -16,7 +16,7 @@ pub struct Canvas{
 }
 
 impl Canvas {
-    pub fn new(start_column: u32, start_line: u32, height: usize, width: usize) -> Self{
+    pub fn new(start_column: i32, start_line: i32, height: usize, width: usize) -> Self{
         let mut content: Vec<String> = Vec::new(); 
         for _ in 0..height{
             let line: String = "".to_string();
@@ -25,7 +25,7 @@ impl Canvas {
         Canvas{
             start_line,
             height,
-            cursor: Cursor::new(start_line as i32, start_column as i32),
+            cursor: Cursor::new(start_line, start_column),
             start_column,
             width,
             content,
@@ -54,16 +54,18 @@ impl Canvas {
     }
 
     pub fn draw(&mut self){
-        self.cursor.jump_up(self.cursor.curr_line - self.start_line as i32 - 1);
+        self.cursor.jump_up(self.cursor.curr_line - self.start_line - 1);
 
         self.draw_top_border();
 
-        let gap: String = " ".repeat(self.start_column as usize);
+        // let gap: String = " ".repeat(self.start_column as usize);
+        let gap = "".to_string();
         let left_border = self.vert_border();
         let right_border = left_border.chars().rev().collect::<String>();
 
         for line in &self.content{
             let buf = " ".repeat(self.width - line.len());
+            self.cursor.jump_right(self.start_column);
             println!("{gap}{left_border}{line}{buf}{right_border}");
         }
 
@@ -77,7 +79,7 @@ impl Canvas {
 
         let mut layers = self.border.len();
         let mut used = "".to_string();
-        let gap: String = " ".repeat(self.start_column as usize);
+        // let gap: String = " ".repeat(self.start_column as usize);
 
         for layer in &self.border{
             let mut top: String = iter::repeat(layer.hori()).take(self.width + layers * 2 - 2).collect();
@@ -86,7 +88,8 @@ impl Canvas {
 
             layers -= 1;
             let used_rev = used.chars().rev().collect::<String>();
-            println!("{gap}{used}{top}{used_rev}");
+            self.cursor.jump_right(self.start_column);
+            println!("{used}{top}{used_rev}");
             used.push(layer.vert());
         }
     }
@@ -95,7 +98,7 @@ impl Canvas {
 
         let mut layers = self.border.len();
         let mut used = self.vert_border();
-        let gap: String = " ".repeat(self.start_column as usize);
+        // let gap: String = " ".repeat(self.start_column as usize);
         
         for layer in self.border.iter().rev(){
             let mut top: String = iter::repeat(layer.hori()).take(self.width + (self.border.len() - layers + 1) * 2 - 2).collect();
@@ -106,7 +109,8 @@ impl Canvas {
             used.pop();
             let used_rev = used.chars().rev().collect::<String>();
 
-            println!("{gap}{used}{top}{used_rev}");
+            self.cursor.jump_right(self.start_column);
+            println!("{used}{top}{used_rev}");
         }
     }
     fn vert_border(&self) -> String{
