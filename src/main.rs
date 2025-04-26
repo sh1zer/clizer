@@ -6,7 +6,7 @@ mod cursor;
 fn main(){
 
     let mut area = DrawingArea::new(9, 0, 5, 30);
-    area.add_border('#');
+    area.add_border('█');
     area.draw();
     sleep(Duration::from_secs(4));
     area.clear();

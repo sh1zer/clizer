@@ -1,8 +1,6 @@
 #![allow(dead_code)]
-
+mod lines;
 use std::iter;
-
-mod cursor;
 
 pub struct DrawingArea{
     start_line: u32,
