@@ -1,29 +1,51 @@
-
-enum ThinLine{
-    Vert = '│' as isize,
-    Hori = '─' as isize,
-    TopLeft = '┌' as isize,
-    TopRight = '┐' as isize,
-    BotLeft = '└' as isize,
-    BotRight = '┘' as isize,
-}
-enum FatLine{
-    Vert = '┃' as isize,
-    Hori = '━' as isize,
-    TopLeft = '┏' as isize,
-    TopRight = '┓' as isize,
-    BotLeft = '┗' as isize,
-    BotRight = '┛' as isize,
-}
-enum DoubleLine{
-    Vert = '║' as isize,
-    Hori = '═' as isize,
-    TopLeft = '╔' as isize,
-    TopRight = '╗' as isize,
-    BotLeft = '╚' as isize,
-    BotRight = '╝' as isize,
+pub trait Line{
+    fn vert(&self) -> char;
+    fn hori(&self) -> char;
+    fn top_left(&self) -> char;
+    fn top_right(&self) -> char;
+    fn bot_left(&self) -> char;
+    fn bot_right(&self) -> char;
 }
 
-trait Line{
+#[derive(Debug, Clone, Copy)]
+pub struct ThinLine;
+#[derive(Debug, Clone, Copy)]
+pub struct FatLine;
+#[derive(Debug, Clone, Copy)]
+pub struct DoubleLine;
+#[derive(Debug, Clone, Copy)]
+pub struct CustomLine(char);
 
+impl Line for ThinLine{
+    fn vert(&self) -> char { '│' }
+    fn hori(&self) -> char { '─' }
+    fn top_left(&self) -> char { '┌' }
+    fn top_right(&self) -> char { '┐' }
+    fn bot_left(&self) -> char { '└' }
+    fn bot_right(&self) -> char { '┘' }
 }
+impl Line for FatLine{
+    fn vert(&self) -> char { '┃' }
+    fn hori(&self) -> char { '━' }
+    fn top_left(&self) -> char { '┏' }
+    fn top_right(&self) -> char { '┓' }
+    fn bot_left(&self) -> char { '┗' }
+    fn bot_right(&self) -> char { '┛' }
+}
+impl Line for DoubleLine{
+    fn vert(&self) -> char { '║' }
+    fn hori(&self) -> char { '═' }
+    fn top_left(&self) -> char { '╔' }
+    fn top_right(&self) -> char { '╗' }
+    fn bot_left(&self) -> char { '╚' }
+    fn bot_right(&self) -> char { '╝' }
+}
+impl Line for CustomLine{
+    fn vert(&self) -> char { self.0 }
+    fn hori(&self) -> char { self.0 }
+    fn top_left(&self) -> char { self.0 }
+    fn top_right(&self) -> char { self.0 }
+    fn bot_left(&self) -> char { self.0 }
+    fn bot_right(&self) -> char { self.0 }
+}
+

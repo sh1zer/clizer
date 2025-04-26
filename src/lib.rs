@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 mod lines;
 use std::iter;
+use lines::Line;
 
 pub struct DrawingArea{
     start_line: u32,
@@ -9,7 +10,7 @@ pub struct DrawingArea{
     width: u32,
     cursor: Cursor,
     content: Vec<String>,
-    border: String,
+    border: Vec<Box<dyn >,
 }
 
 impl DrawingArea{
@@ -44,7 +45,7 @@ impl DrawingArea{
         }
     }
 
-    pub fn add_border(&mut self, border: char){
+    pub fn add_border<L: lines::Line>(&mut self, border: L){
         self.border.push(border);
     }
 
