@@ -1,6 +1,6 @@
-#![allow(unused_imports)]
+#![allow(unused_imports, unused_braces)]
 use std::{thread::sleep, time::Duration};
-use clizer::Canvas;
+use clizer::{TextBox};
 use clizer::lines::{DoubleLine, FatLine, ThinLine};
 use clizer::cursor;
 fn main(){
@@ -8,7 +8,7 @@ fn main(){
         println!();
     }
     cursor::cursor_jump_up(10);
-    let mut area = Canvas::new(9, 1, 5, 30);
+    let mut area = TextBox::new(9, 1, 20, 5);
     area.add_border(DoubleLine);
     // area.add_border(ThinLine);
     // area.add_border(FatLine);
@@ -21,7 +21,7 @@ fn main(){
     
 
     
-    let mut area2 = Canvas::new(49, 1, 5, 20);
+    let mut area2 = TextBox::new(49, 1, 20, 5);
     sleep(Duration::from_secs(1));
     area2.add_border(DoubleLine);
     area2.write_middle("box two".to_string(), 0);
@@ -32,10 +32,8 @@ fn main(){
 
     area.write_middle("wooohooo".to_string(), 2);
     area.draw();
-    sleep(Duration::from_secs(2));
 
     area2.draw();
-    sleep(Duration::from_secs(2));
 
     area.draw();
 
@@ -48,7 +46,6 @@ fn main(){
     // sleep(Duration::from_secs(4));
     // println!("hi\nhello\nwhadup");
     // print!("\x1B[2A");
-    sleep(Duration::from_secs(1));
     // println!("nevermind...");
 
 }

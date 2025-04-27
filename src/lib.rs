@@ -7,7 +7,7 @@ use std::iter;
 use lines::{CustomLine, Line};
 use cursor::Cursor;
 
-pub struct Canvas{
+struct Canvas{
     start_line: i32,
     height: usize,
     start_column: i32,
@@ -18,7 +18,7 @@ pub struct Canvas{
 }
 
 impl Canvas {
-    pub fn new(start_column: i32, start_line: i32, height: usize, width: usize) -> Self{
+    fn new(start_column: i32, start_line: i32, width: usize, height: usize) -> Self{
         let mut content: Vec<String> = Vec::new(); 
         for _ in 0..height{
             let line: String = "".to_string();
@@ -35,7 +35,8 @@ impl Canvas {
         }
     }
 
-    pub fn clear(mut self){
+
+    fn clear(mut self){
         for line in &mut self.content{
             *line = " ".repeat(self.width);
         }
@@ -44,18 +45,17 @@ impl Canvas {
         }
         self.draw();
     }
-
-    pub fn clear_content(&mut self){
+    fn clear_content(&mut self){
         for line in &mut self.content{
             *line = " ".repeat(self.width);
         }
     }
 
-    pub fn add_border<L: Line + 'static>(&mut self, border: L){
+    fn add_border<L: Line + 'static>(&mut self, border: L){
         self.border.push(Box::new(border));
     }
 
-    pub fn draw(&mut self){
+    fn draw(&mut self){
         //self.cursor.jump_up(self.cursor.curr_line - self.start_line - 1);
         self.cursor.move_to_line(self.start_line);
         self.cursor.move_to_col(0);
@@ -79,7 +79,6 @@ impl Canvas {
         self.reset_cursor();
         let _ = io::stdout().flush();
     }
-
     fn draw_top_border(&mut self) {
         if self.border.is_empty() {return;}
 
@@ -133,7 +132,7 @@ impl Canvas {
         res
     }
 
-    pub fn write(&mut self, text: String, row: usize){
+    fn write(&mut self, text: String, row: usize){
         if row >= self.height {return;}
         if text.len() > self.width{
             let fin_text = text.as_str()[0..self.width].to_string();
@@ -143,8 +142,7 @@ impl Canvas {
             self.content[row] = text;
         }
     }
-
-    pub fn write_middle(&mut self, text: String, row: usize){
+    fn write_middle(&mut self, text: String, row: usize){
         if row >= self.height {return;}
         if text.len() > self.width{
             let fin_text = text.as_str()[0..self.width].to_string();
@@ -155,8 +153,7 @@ impl Canvas {
             self.content[row] = format!("{buf}{text}{buf}");
         }
     }
-
-    pub fn write_right(&mut self, text: String, row: usize){
+    fn write_right(&mut self, text: String, row: usize){
         if row >= self.height {return;}
         if text.len() > self.width{
             let fin_text = text.as_str()[0..self.width].to_string();
@@ -168,11 +165,10 @@ impl Canvas {
         }
     }
 
-    pub fn get_cursor(&self) -> &Cursor{
+    fn get_cursor(&self) -> &Cursor{
         &self.cursor
     }
-
-    pub fn reset_cursor(&mut self) {
+    fn reset_cursor(&mut self) {
         self.cursor.move_to_line(1);
         print!("\r");
         self.cursor.curr_line = 1;
@@ -182,22 +178,20 @@ impl Canvas {
 }
 
 
+pub struct TextBox{
+    canvas: Canvas,
+}
 
-// #[cfg(test)]
-// mod tests {
-//     use crate::cursor::{jump, Cursor};
-//
-//     use super::*;
-//
-//     #[test]
-//     fn piss_off(){
-//         let area = DrawingArea::new(2, 2);
-//         assert_eq!(area.num_of_lines, 2);
-//         assert_eq!(area.start_line, 2);
-//     }
-//     #[test]
-//     fn cursor_jumpin(){
-//         println!("hello\nhi\nwhaddup");
-//         println!("nevermind");
-//     }
-// }
+impl TextBox{
+    pub fn new(start_column: i32, start_line: i32, width: usize, height: usize) -> Self{ TextBox{canvas: Canvas::new(start_column, start_line, width, height)} }
+    pub fn clear(self){ self.canvas.clear() }
+    pub fn clear_content(&mut self){ self.canvas.clear_content() }
+    pub fn add_border<L: Line + 'static>(&mut self, border: L){ self.canvas.add_border(border) }
+    pub fn draw(&mut self){ self.canvas.draw() }
+    pub fn write(&mut self, text: String, row: usize){ self.canvas.write(text, row) }
+    pub fn write_middle(&mut self, text: String, row: usize){ self.canvas.write_middle(text, row) }
+    pub fn write_right(&mut self, text: String, row: usize){ self.canvas.write_right(text, row) }
+    pub fn get_cursor(&self) -> &Cursor { self.canvas.get_cursor() }
+    pub fn reset_cursor(&mut self){ self.canvas.reset_cursor() }
+}
+
